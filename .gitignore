@@ -1,0 +1,11 @@
+# Jetbrains
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data files
+auth_tokens.json
+data.json
