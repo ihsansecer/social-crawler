@@ -5,8 +5,6 @@ class UserCrawler(object):
         self.user_id = self.user.id
         self.data = {}
         self.data.setdefault(self.user.id, {
-            "name": self.user.name,
-            "screen_name": self.user.screen_name,
             "friends": {},
             "followers": {}
         })
@@ -15,10 +13,9 @@ class UserCrawler(object):
         connection_fetcher = getattr(self.api, "{}_ids".format(connection_type))
         connections = connection_fetcher(self.user_id)
         for connection in connections:
-            connection = self.api.get_user(connection)
-            self.data[self.user_id][connection_type].setdefault(connection.id, {
-                "name": connection.name,
-                "screen_name": connection.screen_name
+            self.data[self.user_id][connection_type].setdefault(connection, {
+                "friends": {},
+                "followers": {}
             })
 
     def _crawl_friends(self):
