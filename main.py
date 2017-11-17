@@ -1,8 +1,6 @@
-import json
-
 import click
 
-from util import authenticate
+from utils import authenticate, read_file, write_file
 from crawlers import UserCrawler
 
 
@@ -17,17 +15,13 @@ def crawl_users(depth):
     """
     Crawl users in screen_names.json using their friends and followers.Then saves it to data.json
     """
-    with open("screen_names.json", 'r') as f:
-        screen_names = json.load(f)
-
+    screen_names = read_file("screen_names.json")
     data = {}
     api = authenticate()
     for screen_name in screen_names:
         crawler = UserCrawler(screen_name, api)
         data.update(crawler.crawl(depth=depth))
-
-    with open("data.json", 'w') as f:
-        json.dump(data, f)
+    write_file("data.json", data)
 
 
 if __name__ == '__main__':
