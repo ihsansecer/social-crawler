@@ -12,7 +12,8 @@ def cli():
 
 
 @cli.command()
-def crawl_users():
+@click.option("--depth", "-d", default=1, help="Depth level of crawler")
+def crawl_users(depth):
     """
     Crawl users in screen_names.json using their friends and followers.Then saves it to data.json
     """
@@ -23,7 +24,7 @@ def crawl_users():
     api = authenticate()
     for screen_name in screen_names:
         crawler = UserCrawler(screen_name, api)
-        data.update(crawler.crawl())
+        data.update(crawler.crawl(depth=depth))
 
     with open("data.json", 'w') as f:
         json.dump(data, f)
