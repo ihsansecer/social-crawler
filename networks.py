@@ -34,3 +34,10 @@ class UserNetwork(object):
     def create(self):
         self._create_network(self._user_data)
         return self._g
+
+    def filter(self, incoming, outgoing):
+        filtered = []
+        for node in self._g:
+            if incoming <= len(self._g.in_edges(node)) and outgoing <= len(self._g.out_edges(node)):
+                filtered.append(node)
+        return filtered
