@@ -42,5 +42,16 @@ def filter_users(incoming, outgoing):
     write_file("data.json", data)
 
 
+@cli.command()
+def crawl_tweets():
+    """
+    Crawls tweets using filtered user ids inside data.json. Then saves it to data.json.
+    """
+    data = read_file("data.json")
+    filtered_users = data["filtered_users"]
+    crawled_tweets = []
+    data.update({"crawled_tweets": crawled_tweets})
+
+
 if __name__ == '__main__':
     cli()

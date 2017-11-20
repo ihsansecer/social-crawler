@@ -47,3 +47,9 @@ class UserCrawler(object):
     def crawl(self, depth=1):
         self._crawl_all(self._user_id, depth)
         return self._data
+
+
+class UserTweetCrawler(object):
+    def __init__(self, user_id, api):
+        self._api = api
+        self._user_id = user_id
