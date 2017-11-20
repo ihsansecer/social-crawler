@@ -4,7 +4,7 @@ import tweepy
 class UserCrawler(object):
     def __init__(self, user_id, api):
         self._api = api
-        self._user = api.get_user(user_id)
+        self._user_id = user_id
         self._data = {}
 
     def _init_user(self, user_id):
@@ -45,5 +45,5 @@ class UserCrawler(object):
         self._crawl_followers(*args)
 
     def crawl(self, depth=1):
-        self._crawl_all(self._user.id, depth)
+        self._crawl_all(self._user_id, depth)
         return self._data
