@@ -47,3 +47,17 @@ class UserCrawler(object):
     def crawl(self, depth=1):
         self._crawl_all(self._user_id, depth)
         return self._data
+
+
+class UserTweetCrawler(object):
+    def __init__(self, api, user_id):
+        self._api = api
+        self._user_id = user_id
+
+    def crawl(self):
+        try:
+            tweets = tweepy.Cursor(self._api.user_timeline, id=self._user_id).items()
+        except tweepy.TweepError:
+            return []
+        return [{self._user_id: {"tweet_id": tweet.id_str, "date": str(tweet.created_at), "tweet": tweet.text}}
+                for tweet in tweets]

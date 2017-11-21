@@ -1,7 +1,7 @@
 import click
 
 from utils import authenticate, read_file, write_file
-from crawlers import UserCrawler
+from crawlers import UserCrawler, UserTweetCrawler
 from networks import UserNetwork
 
 
@@ -39,6 +39,22 @@ def filter_users(incoming, outgoing):
     network.create()
     filtered_users = network.filter(incoming, outgoing)
     data.update({"filtered_users": filtered_users})
+    write_file("data.json", data)
+
+
+@cli.command()
+def crawl_tweets():
+    """
+    Crawls tweets using filtered user ids inside data.json. Then saves it to data.json.
+    """
+    data = read_file("data.json")
+    filtered_users = data["filtered_users"]
+    crawled_tweets = []
+    api = authenticate()
+    for user in filtered_users:
+        crawler = UserTweetCrawler(api, user)
+        crawled_tweets.extend(crawler.crawl())
+    data.update({"crawled_tweets": crawled_tweets})
     write_file("data.json", data)
 
 
