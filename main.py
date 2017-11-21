@@ -7,6 +7,9 @@ from networks import UserNetwork
 
 @click.group()
 def cli():
+    """
+    Steps: 1) Crawl users 2) Filter users 3) Crawl tweets
+    """
     pass
 
 
@@ -14,7 +17,8 @@ def cli():
 @click.option("--depth", "-d", default=1, help="Depth level of crawler")
 def crawl_users(depth):
     """
-    Crawls users in screen_names.json using their friends and followers. Then saves it to data.json.
+    Crawls users in screen_names.json using their friends and followers. Then saves it to data.json with
+    crawled_users key.
     """
     screen_names = read_file("screen_names.json")
     crawled_users = {}
@@ -32,7 +36,7 @@ def crawl_users(depth):
 @click.option("--outgoing", "-out", default=1, help="Number of outgoing edges")
 def filter_users(incoming, outgoing):
     """
-    Filters users by number of incoming and outgoing edges. Then saves it to data.json.
+    Filters users by number of incoming and outgoing edges. Then saves it to data.json with filtered_users key.
     """
     data = read_file("data.json")
     network = UserNetwork(data["crawled_users"])
@@ -45,7 +49,7 @@ def filter_users(incoming, outgoing):
 @cli.command()
 def crawl_tweets():
     """
-    Crawls tweets using filtered user ids inside data.json. Then saves it to data.json.
+    Crawls tweets using filtered user ids inside data.json. Then saves it to data.json with crawled_tweets key.
     """
     data = read_file("data.json")
     filtered_users = data["filtered_users"]
