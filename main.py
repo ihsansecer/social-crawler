@@ -2,7 +2,9 @@ import click
 
 from utils import authenticate, read_file, write_file
 from crawlers import UserCrawler
+from crawlers import UserTweetCrawler
 from networks import UserNetwork
+
 
 
 @click.group()
@@ -41,6 +43,13 @@ def filter_users(incoming, outgoing):
     data.update({"filtered_users": filtered_users})
     write_file("data.json", data)
 
+@cli.command()
+def crawl_tweets():
+    data = read_file("data.json")
+    filtered_users = data["filter_users"]
+    crawl_tweets = UserTweetCrawler(filtered_users)
+    crawled_tweets = crawl_tweets.catch_user()
+    data.update({"crawled_tweets": crawled_tweets})
 
 @cli.command()
 def crawl_tweets():

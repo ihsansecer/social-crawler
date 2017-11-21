@@ -48,8 +48,46 @@ class UserCrawler(object):
         self._crawl_all(self._user_id, depth)
         return self._data
 
+<<<<<<< HEAD
+class UserTweetCrawler(object):
+    def __init__(self, user_list):
+        self.user_list = user_list
+        self.user_tweets = []
+        self.result = []
+
+    def catch_user(self):
+        for user_id in self.user_list:
+            crawl_tweets.get_all_tweets(user_id)
+
+        return self.result
+
+    def get_all_tweets(self, user_id):
+        all_tweets = []
+        new_tweets = api.user_timeline(id=user_id, count=200)
+        all_tweets.extend(new_tweets)
+        oldest = all_tweets[-1].id - 1
+
+        while len(new_tweets) > 0:
+            new_tweets = api.user_timeline(id=user_id, count=200, max_id=oldest)
+            all_tweets.extend(new_tweets)
+            oldest = all_tweets[-1].id - 1
+
+        self.user_tweets = [{user_id: {"tweet_id": tweet.id_str, "date": str(tweet.created_at),
+                                  "tweet": tweet.text.encode("utf-8")}} for tweet in all_tweets]
+
+        crawl_tweets.convert_json()
+
+    def convert_json(self):
+        try:
+            old_results = json.loads(self.result)
+            self.result = json.dumps(old_results + self.user_tweets)
+
+        except TypeError:
+            self.result = json.dumps(self.user_tweets)
+=======
 
 class UserTweetCrawler(object):
     def __init__(self, user_id, api):
         self._api = api
         self._user_id = user_id
+>>>>>>> 0a6711a3bfa7ee6f5baefd448303b3a9127845cd
