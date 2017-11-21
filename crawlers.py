@@ -50,29 +50,14 @@ class UserCrawler(object):
 
 
 class UserTweetCrawler(object):
-    def __init__(self, api, user_list):
-        self.api = api
-        self.user_list = user_list
-        self.user_tweets = []
-        self.result = []
+    def __init__(self, api, user_id):
+        self._api = api
+        self._user_id = user_id
 
-    def catch_user(self):
-        for user_id in self.user_list:
-            self.get_all_tweets(user_id)
-
-        return self.result
-
-    def get_all_tweets(self, user_id):
-        all_tweets = []
-        new_tweets = self.api.user_timeline(id=user_id, count=200)
-        all_tweets.extend(new_tweets)
-        oldest = all_tweets[-1].id - 1
-
-        while len(new_tweets) > 0:
-            new_tweets = self.api.user_timeline(id=user_id, count=200, max_id=oldest)
-            all_tweets.extend(new_tweets)
-            oldest = all_tweets[-1].id - 1
-
-        self.user_tweets = [{user_id: {"tweet_id": tweet.id_str, "date": str(tweet.created_at),
-                            "tweet": tweet.text}} for tweet in all_tweets]
-        self.result.append(self.user_tweets)
+    def crawl(self):
+        try:
+            tweets = tweepy.Cursor(self._api.user_timeline, id=self._user_id).items()
+        except tweepy.TweepError:
+            return []
+        return [{self._user_id: {"tweet_id": tweet.id_str, "date": str(tweet.created_at), "tweet": tweet.text}}
+                for tweet in tweets]

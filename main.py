@@ -5,7 +5,6 @@ from crawlers import UserCrawler, UserTweetCrawler
 from networks import UserNetwork
 
 
-
 @click.group()
 def cli():
     pass
@@ -50,9 +49,11 @@ def crawl_tweets():
     """
     data = read_file("data.json")
     filtered_users = data["filtered_users"]
+    crawled_tweets = []
     api = authenticate()
-    crawler = UserTweetCrawler(api, filtered_users)
-    crawled_tweets = crawler.catch_user()
+    for user in filtered_users:
+        crawler = UserTweetCrawler(api, user)
+        crawled_tweets.extend(crawler.crawl())
     data.update({"crawled_tweets": crawled_tweets})
     write_file("data.json", data)
 
