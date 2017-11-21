@@ -22,7 +22,7 @@ class UserCrawler(object):
     def _fetch_connection_ids(self, user_id, connection_type):
         connection_fetcher = getattr(self._api, "{}_ids".format(connection_type))
         try:
-            return connection_fetcher(user_id)
+            return tweepy.Cursor(connection_fetcher, id=user_id).items()
         except tweepy.TweepError:
             return []
 
