@@ -53,11 +53,11 @@ def crawl_tweets():
     """
     data = read_file("data.json")
     filtered_users = data["filtered_users"]
-    crawled_tweets = []
+    crawled_tweets = {}
     api = authenticate()
     for user in filtered_users:
         crawler = UserTweetCrawler(api, user)
-        crawled_tweets.extend(crawler.crawl())
+        crawled_tweets.update(crawler.crawl())
     data.update({"crawled_tweets": crawled_tweets})
     write_file("data.json", data)
 

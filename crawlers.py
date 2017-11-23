@@ -53,11 +53,15 @@ class UserTweetCrawler(object):
     def __init__(self, api, user_id):
         self._api = api
         self._user_id = user_id
+        self._data = {}
+        self._data.setdefault(user_id, {"tweets": {}})
 
     def crawl(self):
         try:
             tweets = tweepy.Cursor(self._api.user_timeline, id=self._user_id).items()
+            for tweet in tweets:
+                self._data[self._user_id]["tweets"]\
+                    .setdefault(tweet.id_str, {"date": str(tweet.created_at), "tweet": tweet.text})
+            return self._data
         except tweepy.TweepError:
             return []
-        return [{self._user_id: {"tweet_id": tweet.id_str, "date": str(tweet.created_at), "tweet": tweet.text}}
-                for tweet in tweets]
