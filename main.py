@@ -1,8 +1,8 @@
 import click
 
-from utils import authenticate, read_file, write_file
-from crawlers import UserCrawler, UserTweetCrawler
-from networks import UserNetwork
+from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
+from socialcrawler.networks import UserNetwork
+from socialcrawler.utils import init_twitter_api, read_file, write_file
 
 
 @click.group()
@@ -20,11 +20,11 @@ def crawl_users(depth):
     Crawls users in screen_names.json using their friends and followers. Then saves it to data.json with
     crawled_users key.
     """
-    screen_names = read_file("screen_names.json")
+    targets = read_file("config.json")["twitter"]["targets"]
     crawled_users = {}
-    api = authenticate()
-    for screen_name in screen_names:
-        crawler = UserCrawler(screen_name, api)
+    api = init_twitter_api()
+    for target in targets:
+        crawler = UserCrawler(target, api)
         crawled_users.update(crawler.crawl(depth=depth))
     data = read_file("data.json")
     data.update({"crawled_users": crawled_users})
@@ -54,7 +54,7 @@ def crawl_tweets():
     data = read_file("data.json")
     filtered_users = data["filtered_users"]
     crawled_tweets = {}
-    api = authenticate()
+    api = init_twitter_api()
     for user in filtered_users:
         crawler = UserTweetCrawler(api, user)
         crawled_tweets.update(crawler.crawl())
