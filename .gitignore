@@ -20,3 +20,7 @@ venv.bak/
 
 # Notebook
 .ipynb_checkpoints
+
+# SQLite database
+*.sqlite3
+*.sqlite3-journal
