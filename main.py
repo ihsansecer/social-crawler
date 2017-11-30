@@ -1,6 +1,7 @@
 import click
 
 from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
+from socialcrawler.models import TwitterUser
 from socialcrawler.networks import UserNetwork
 from socialcrawler.utils import init_twitter_api, get_config, connect_db
 
@@ -47,10 +48,11 @@ def crawl_tweets():
     """
     Crawls tweets using filtered user ids inside data.json. Then saves it to data.json with crawled_tweets key.
     """
-    targets = []
     api = init_twitter_api()
+    session = connect_db()
+    targets = session.query(TwitterUser).all()
     for user in targets:
-        crawler = UserTweetCrawler(api, user)
+        crawler = UserTweetCrawler(api, session, user.id)
         crawler.crawl()
 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -23,3 +23,12 @@ class TwitterConnection(Base):
     from_user = relationship("TwitterUser", foreign_keys=[from_user_id])
     to_user_id = Column(ForeignKey("twitter_user.id"))
     to_user = relationship("TwitterUser", foreign_keys=[to_user_id])
+
+
+class TwitterEntry(Base):
+    __tablename__ = 'twitter_entry'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(ForeignKey("twitter_user.id"))
+    user = relationship("TwitterUser", foreign_keys=[user_id])
+    text = Column(String(280))

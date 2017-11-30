@@ -1,6 +1,6 @@
 import tweepy
 
-from socialcrawler.models import TwitterUser, TwitterConnection
+from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry
 
 
 class UserCrawler(object):
@@ -57,21 +57,24 @@ class UserCrawler(object):
     def crawl(self, depth=1):
         self._create_user(self._user_id, is_init=True)
         self._crawl_all(self._user_id, depth)
+        self._session.commit()
 
 
 class UserTweetCrawler(object):
-    def __init__(self, api, user_id):
+    def __init__(self, api, session, user_id):
         self._api = api
         self._user_id = user_id
-        self._data = {}
-        self._data.setdefault(user_id, {"tweets": {}})
+        self._session = session
 
     def crawl(self):
         try:
             tweets = tweepy.Cursor(self._api.user_timeline, id=self._user_id).items()
             for tweet in tweets:
-                self._data[self._user_id]["tweets"] \
-                    .setdefault(tweet.id_str, {"date": str(tweet.created_at), "tweet": tweet.text})
-            return self._data
+                self._session.merge(TwitterEntry(
+                    id=tweet.id,
+                    user_id=self._user_id,
+                    text=tweet.text
+                ))
+            self._session.commit()
         except tweepy.TweepError:
             return []
