@@ -2,7 +2,7 @@ import click
 
 from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
 from socialcrawler.networks import UserNetwork
-from socialcrawler.utils import init_twitter_api, read_file, write_file
+from socialcrawler.utils import init_twitter_api, get_config, connect_db
 
 
 @click.group()
@@ -20,15 +20,13 @@ def crawl_users(depth):
     Crawls users in screen_names.json using their friends and followers. Then saves it to data.json with
     crawled_users key.
     """
-    targets = read_file("config.json")["twitter"]["targets"]
-    crawled_users = {}
+    config = get_config()
+    targets = config.twitter.targets
     api = init_twitter_api()
+    session = connect_db()
     for target in targets:
-        crawler = UserCrawler(target, api)
-        crawled_users.update(crawler.crawl(depth=depth))
-    data = read_file("data.json")
-    data.update({"crawled_users": crawled_users})
-    write_file("data.json", data)
+        crawler = UserCrawler(api, session, target)
+        crawler.crawl(depth=depth)
 
 
 @cli.command()
@@ -38,12 +36,10 @@ def filter_users(incoming, outgoing):
     """
     Filters users by number of incoming and outgoing edges. Then saves it to data.json with filtered_users key.
     """
-    data = read_file("data.json")
-    network = UserNetwork(data["crawled_users"])
+    targets = []
+    network = UserNetwork(targets)
     network.create()
-    filtered_users = network.filter(incoming, outgoing)
-    data.update({"filtered_users": filtered_users})
-    write_file("data.json", data)
+    network.filter(incoming, outgoing)
 
 
 @cli.command()
@@ -51,15 +47,11 @@ def crawl_tweets():
     """
     Crawls tweets using filtered user ids inside data.json. Then saves it to data.json with crawled_tweets key.
     """
-    data = read_file("data.json")
-    filtered_users = data["filtered_users"]
-    crawled_tweets = {}
+    targets = []
     api = init_twitter_api()
-    for user in filtered_users:
+    for user in targets:
         crawler = UserTweetCrawler(api, user)
-        crawled_tweets.update(crawler.crawl())
-    data.update({"crawled_tweets": crawled_tweets})
-    write_file("data.json", data)
+        crawler.crawl()
 
 
 if __name__ == '__main__':

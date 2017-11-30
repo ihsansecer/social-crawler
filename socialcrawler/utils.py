@@ -1,6 +1,8 @@
 from collections import namedtuple
 import json
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import tweepy
 
 
@@ -16,11 +18,8 @@ def get_config():
         return json.load(f, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
 
 
-def read_file(path):
-    with open(path, 'r') as f:
-        return json.load(f)
-
-
-def write_file(path, data):
-    with open(path, 'w') as f:
-        json.dump(data, f)
+def connect_db():
+    db_url = get_config().db.url
+    engine = create_engine(db_url)
+    Session = sessionmaker(bind=engine)
+    return Session()
