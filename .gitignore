@@ -24,3 +24,6 @@ venv.bak/
 # SQLite database
 *.sqlite3
 *.sqlite3-journal
+
+# Outputs
+*.out
