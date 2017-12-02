@@ -7,9 +7,9 @@ This cli tool uses Twitter api to:
 
 ### Setup
 
-Create virtual environment with Python 3 interpreter
+Create virtual environment with Python 2.7 interpreter and make sure that your operating system is 64-bit and that you are using 64-bit versions of Python 2.7.x.
 
-`virtualenv -p /usr/bin/python3.5 venv`
+`virtualenv -p /usr/bin/python2.7 venv`
 
 Activate virtual environment
 
@@ -18,6 +18,8 @@ Activate virtual environment
 Install requirements
 
 `pip install -r requirements.txt`
+
+Donwload and install Snap.py (instructions are [here](https://snap.stanford.edu/snappy/#download))
 
 And ask for help!
 
