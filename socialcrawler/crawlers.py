@@ -15,7 +15,12 @@ class UserCrawler(object):
             id=user.id,
             name=user.name,
             screen_name=user.screen_name,
-            description=user.description
+            description=user.description,
+            followers_count=user.followers_count,
+            friends_count=user.followers_count,
+            favourites_count=user.favourites_count,
+            statuses_count=user.statuses_count,
+            lang=user.lang
         ))
         if is_init:
             self._user_id = user.id

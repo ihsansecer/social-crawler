@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -9,10 +9,15 @@ Base = declarative_base()
 class TwitterUser(Base):
     __tablename__ = "twitter_user"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
     name = Column(String(50), nullable=False)
     screen_name = Column(String(50), nullable=False)
     description = Column(String(160))
+    followers_count = Column(Integer, nullable=False)
+    friends_count = Column(Integer, nullable=False)
+    favourites_count = Column(Integer, nullable=False)
+    statuses_count = Column(Integer, nullable=False)
+    lang = Column(String(5), nullable=False)
 
 
 class TwitterConnection(Base):
