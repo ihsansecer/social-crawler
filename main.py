@@ -1,15 +1,13 @@
 import click
 
 from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
-from socialcrawler.networks import UserNetwork
-from socialcrawler.utils import init_twitter_api, read_file, write_file
+from socialcrawler.models import TwitterUser
+from socialcrawler.networks import TwitterUserNetwork
+from socialcrawler.utils import init_twitter_api, get_config, connect_db
 
 
 @click.group()
 def cli():
-    """
-    Steps: 1) Crawl users 2) Filter users 3) Crawl tweets
-    """
     pass
 
 
@@ -17,49 +15,38 @@ def cli():
 @click.option("--depth", "-d", default=1, help="Depth level of crawler")
 def crawl_users(depth):
     """
-    Crawls users in screen_names.json using their friends and followers. Then saves it to data.json with
-    crawled_users key.
+    Crawls users in screen_names.json using their friends and followers.
     """
-    targets = read_file("config.json")["twitter"]["targets"]
-    crawled_users = {}
+    config = get_config()
+    targets = config.twitter.targets
     api = init_twitter_api()
+    session = connect_db()
     for target in targets:
-        crawler = UserCrawler(target, api)
-        crawled_users.update(crawler.crawl(depth=depth))
-    data = read_file("data.json")
-    data.update({"crawled_users": crawled_users})
-    write_file("data.json", data)
+        crawler = UserCrawler(api, session, target)
+        crawler.crawl(depth=depth)
 
 
 @cli.command()
-@click.option("--incoming", "-in", default=1, help="Number of incoming edges")
-@click.option("--outgoing", "-out", default=1, help="Number of outgoing edges")
-def filter_users(incoming, outgoing):
+def create_network():
     """
-    Filters users by number of incoming and outgoing edges. Then saves it to data.json with filtered_users key.
+    Creates a twitter user network. (Not complete)
     """
-    data = read_file("data.json")
-    network = UserNetwork(data["crawled_users"])
+    session = connect_db()
+    network = TwitterUserNetwork(session)
     network.create()
-    filtered_users = network.filter(incoming, outgoing)
-    data.update({"filtered_users": filtered_users})
-    write_file("data.json", data)
 
 
 @cli.command()
 def crawl_tweets():
     """
-    Crawls tweets using filtered user ids inside data.json. Then saves it to data.json with crawled_tweets key.
+    Crawls tweets using users in database.
     """
-    data = read_file("data.json")
-    filtered_users = data["filtered_users"]
-    crawled_tweets = {}
     api = init_twitter_api()
-    for user in filtered_users:
-        crawler = UserTweetCrawler(api, user)
-        crawled_tweets.update(crawler.crawl())
-    data.update({"crawled_tweets": crawled_tweets})
-    write_file("data.json", data)
+    session = connect_db()
+    targets = session.query(TwitterUser).all()
+    for user in targets:
+        crawler = UserTweetCrawler(api, session, user.id)
+        crawler.crawl()
 
 
 if __name__ == '__main__':

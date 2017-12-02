@@ -13,5 +13,8 @@
       "sehiricebreaker", "sehir_fm", "sehir_munazara", "sehirsanat", "SehirKonsey", "SehirHUKUK", "sehiryesilay",
       "sehirpolitika", "SehirMuhKulubu", "gastesehir", "ieeesehir", "qbitclub", "sehircayhane"
     ]
+  },
+  "db": {
+    "url": "driver://user:pass@localhost/dbname"
   }
 }
