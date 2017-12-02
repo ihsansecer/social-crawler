@@ -2,15 +2,12 @@ import click
 
 from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
 from socialcrawler.models import TwitterUser
-from socialcrawler.networks import UserNetwork
+from socialcrawler.networks import TwitterUserNetwork
 from socialcrawler.utils import init_twitter_api, get_config, connect_db
 
 
 @click.group()
 def cli():
-    """
-    Steps: 1) Crawl users 2) Filter users 3) Crawl tweets
-    """
     pass
 
 
@@ -18,8 +15,7 @@ def cli():
 @click.option("--depth", "-d", default=1, help="Depth level of crawler")
 def crawl_users(depth):
     """
-    Crawls users in screen_names.json using their friends and followers. Then saves it to data.json with
-    crawled_users key.
+    Crawls users in screen_names.json using their friends and followers.
     """
     config = get_config()
     targets = config.twitter.targets
@@ -31,22 +27,19 @@ def crawl_users(depth):
 
 
 @cli.command()
-@click.option("--incoming", "-in", default=1, help="Number of incoming edges")
-@click.option("--outgoing", "-out", default=1, help="Number of outgoing edges")
-def filter_users(incoming, outgoing):
+def create_network():
     """
-    Filters users by number of incoming and outgoing edges. Then saves it to data.json with filtered_users key.
+    Creates a twitter user network. (Not complete)
     """
-    targets = []
-    network = UserNetwork(targets)
+    session = connect_db()
+    network = TwitterUserNetwork(session)
     network.create()
-    network.filter(incoming, outgoing)
 
 
 @cli.command()
 def crawl_tweets():
     """
-    Crawls tweets using filtered user ids inside data.json. Then saves it to data.json with crawled_tweets key.
+    Crawls tweets using users in database.
     """
     api = init_twitter_api()
     session = connect_db()

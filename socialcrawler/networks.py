@@ -1,43 +1,48 @@
-import networkx as nx
+import snap as sp
+
+from socialcrawler.models import TwitterUser, TwitterConnection
 
 
-class UserNetwork(object):
-    def __init__(self, user_data):
-        self._g = nx.DiGraph()
-        self._user_data = user_data
+class TwitterUserNetwork(object):
+    def __init__(self, session):
+        self._session = session
+        self._graph = sp.TNGraph.New()
+        self._users = session.query(TwitterUser).all()
 
-    def _create_network(self, user_data):
-        for user in user_data:
-            self._g.add_node(user)
-            self._extend_network(user, user_data)
+    @staticmethod
+    def _get_id_attr(obj, connection_type, is_user):
+        direction = "from" if (is_user and connection_type == "friend") \
+                       or not (is_user and connection_type == "follower") else "to"
+        return getattr(obj, "{}_user_id".format(direction))
 
-    def _extend_network(self, user, user_data):
-        friends, followers = user_data[user]["friends"], user_data[user]["followers"]
-        if friends:
-            self._create_friends_network(user, friends)
-            self._create_network(friends)
-        if followers:
-            self._create_followers_network(user, followers)
-            self._create_network(followers)
+    def _find_connection_index(self, connection_id_attr):
+        return next(i for i, user in enumerate(self._users) if user.id == connection_id_attr)
 
-    def _create_connections_network(self, connection_type, user, connections):
-        self._g.add_nodes_from(connections)
-        edges = [(user, connection) if connection_type == "fr" else (connection, user) for connection in connections]
-        self._g.add_edges_from(edges)
+    def _create_edges(self, connection_type, user, user_index):
+        user_id_attr = self._get_id_attr(TwitterConnection, connection_type, True)
+        connections = self._session.query(TwitterConnection).filter(user_id_attr == user.id).all()
+        for connection in connections:
+            connection_id_attr = self._get_id_attr(connection, connection_type, False)
+            connection_index = self._find_connection_index(connection_id_attr)
+            if not self._graph.IsNode(connection_index):
+                self._graph.AddNode(connection_index)
+            self._graph.AddEdge(connection_index, user_index)
 
-    def _create_friends_network(self, *args):
-        self._create_connections_network("fr", *args)
+    def _create_friend_edges(self, *args):
+        self._create_edges("friend", *args)
 
-    def _create_followers_network(self, *args):
-        self._create_connections_network("fo", *args)
+    def _create_follower_edges(self, *args):
+        self._create_edges("friend", *args)
+
+    def _create_all(self, *args):
+        self._create_friend_edges(*args)
+        self._create_follower_edges(*args)
 
     def create(self):
-        self._create_network(self._user_data)
-        return self._g
+        for user_index, user in enumerate(self._users):
+            if not self._graph.IsNode(user_index):
+                self._graph.AddNode(user_index)
+            self._create_all(user, user_index)
 
-    def filter(self, incoming, outgoing):
-        filtered = []
-        for node in self._g:
-            if incoming <= len(self._g.in_edges(node)) and outgoing <= len(self._g.out_edges(node)):
-                filtered.append(node)
-        return filtered
+    def get(self):
+        return self._graph
