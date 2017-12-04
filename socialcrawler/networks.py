@@ -32,7 +32,7 @@ class TwitterUserNetwork(object):
         self._create_edges("friend", *args)
 
     def _create_follower_edges(self, *args):
-        self._create_edges("friend", *args)
+        self._create_edges("follower", *args)
 
     def _create_all(self, *args):
         self._create_friend_edges(*args)
