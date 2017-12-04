@@ -1,6 +1,7 @@
 import tweepy
 
 from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry
+from socialcrawler.utils import row_exist
 
 
 class UserCrawler(object):
@@ -9,9 +10,8 @@ class UserCrawler(object):
         self._session = session
         self._user_id = user_id
 
-    def _create_user(self, user_id, is_init=False):
-        user = self._api.get_user(user_id)
-        self._session.merge(TwitterUser(
+    def _create_user(self, user):
+        self._session.add(TwitterUser(
             id=user.id,
             name=user.name,
             screen_name=user.screen_name,
@@ -22,14 +22,14 @@ class UserCrawler(object):
             statuses_count=user.statuses_count,
             lang=user.lang
         ))
-        if is_init:
-            self._user_id = user.id
+        self._session.commit()
 
     def _create_connection(self, from_user_id, to_user_id):
-        self._session.merge(TwitterConnection(
+        self._session.add(TwitterConnection(
             from_user_id=from_user_id,
             to_user_id=to_user_id
         ))
+        self._session.commit()
 
     def _fetch_connection_ids(self, user_id, connection_type):
         connection_fetcher = getattr(self._api, "{}_ids".format(connection_type))
@@ -41,10 +41,14 @@ class UserCrawler(object):
     def _crawl_connections(self, connection_type, user_id, depth):
         connection_ids = self._fetch_connection_ids(user_id, connection_type)
         for connection_id in connection_ids:
-            self._create_user(connection_id)
-            if connection_type == "friends":
+            if not row_exist(self._session, TwitterUser, id=connection_id):
+                user = self._api.get_user(connection_id)
+                self._create_user(user)
+            if connection_type == "friends" and \
+                    not row_exist(self._session, TwitterConnection, from_user_id=user_id, to_user_id=connection_id):
                 self._create_connection(user_id, connection_id)
-            else:
+            elif connection_type == "followers" and \
+                    not row_exist(self._session, TwitterConnection, from_user_id=connection_id, to_user_id=user_id):
                 self._create_connection(connection_id, user_id)
             if depth > 1:
                 self._crawl_all(connection_id, depth - 1)
@@ -60,7 +64,10 @@ class UserCrawler(object):
         self._crawl_followers(*args)
 
     def crawl(self, depth=1):
-        self._create_user(self._user_id, is_init=True)
+        user = self._api.get_user(self._user_id)
+        if not row_exist(self._session, TwitterUser, id=user.id):
+            self._create_user(user)
+        self._user_id = user.id
         self._crawl_all(self._user_id, depth)
         self._session.commit()
 

@@ -23,3 +23,7 @@ def connect_db():
     engine = create_engine(db_url)
     Session = sessionmaker(bind=engine)
     return Session()
+
+
+def row_exist(session, model, **kwargs):
+    return session.query(model).filter_by(**kwargs).first() is not None
