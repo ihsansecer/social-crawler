@@ -35,14 +35,26 @@ class UserCrawler(object):
         connection_fetcher = getattr(self._api, "{}_ids".format(connection_type))
         try:
             return tweepy.Cursor(connection_fetcher, id=user_id).items()
-        except tweepy.TweepError:
+        except tweepy.TweepError as e:
+            if e.api_code == 179:
+                print "not authorized to see {} of user, {}.".format(connection_type, self._user_id)
             return []
+
+    def _fetch_user(self, user_id):
+        try:
+            return self._api.get_user(user_id)
+        except tweepy.TweepError as e:
+            if e.api_code == 50:
+                print "user, {} not found.".format(self._user_id)
+            return None
 
     def _crawl_connections(self, connection_type, user_id, depth):
         connection_ids = self._fetch_connection_ids(user_id, connection_type)
         for connection_id in connection_ids:
             if not row_exist(self._session, TwitterUser, id=connection_id):
-                user = self._api.get_user(connection_id)
+                user = self._fetch_user(connection_id)
+                if not user:
+                    continue
                 self._create_user(user)
             if connection_type == "friends" and \
                     not row_exist(self._session, TwitterConnection, from_user_id=user_id, to_user_id=connection_id):
@@ -50,6 +62,7 @@ class UserCrawler(object):
             elif connection_type == "followers" and \
                     not row_exist(self._session, TwitterConnection, from_user_id=connection_id, to_user_id=user_id):
                 self._create_connection(connection_id, user_id)
+
             if depth > 1:
                 self._crawl_all(connection_id, depth - 1)
 
@@ -65,6 +78,8 @@ class UserCrawler(object):
 
     def crawl(self, depth=1):
         user = self._api.get_user(self._user_id)
+        if not user:
+            return
         if not row_exist(self._session, TwitterUser, id=user.id):
             self._create_user(user)
         self._user_id = user.id
@@ -88,5 +103,7 @@ class UserTweetCrawler(object):
                     text=tweet.text
                 ))
             self._session.commit()
-        except tweepy.TweepError:
+        except tweepy.TweepError as e:
+            if e.api_code == 179:
+                print "not authorized to see tweets of user, {}.".format(self._user_id)
             return []
