@@ -17,7 +17,7 @@ class UserCrawler(object):
             screen_name=user.screen_name,
             description=user.description,
             followers_count=user.followers_count,
-            friends_count=user.followers_count,
+            friends_count=user.friends_count,
             favourites_count=user.favourites_count,
             statuses_count=user.statuses_count,
             lang=user.lang
