@@ -2,8 +2,7 @@
 
 This cli tool uses Twitter api to:
 - Crawls friends and followers of users inside screen_names.json
-- Filters crawled users using their connections to build a network
-- Crawls tweets of built network (filtered users)
+- Crawls tweets of users
 
 ### Setup
 
@@ -18,8 +17,6 @@ Activate virtual environment
 Install requirements
 
 `pip install -r requirements.txt`
-
-Donwload and install Snap.py (instructions are [here](https://snap.stanford.edu/snappy/#download))
 
 And ask for help!
 

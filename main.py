@@ -2,7 +2,6 @@ import click
 
 from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
 from socialcrawler.models import TwitterUser
-from socialcrawler.networks import TwitterUserNetwork
 from socialcrawler.utils import init_twitter_api, get_config, connect_db
 
 
@@ -24,16 +23,6 @@ def crawl_users(depth):
     for target in targets:
         crawler = UserCrawler(api, session, target)
         crawler.crawl(depth=depth)
-
-
-@cli.command()
-def create_network():
-    """
-    Creates a twitter user network. (Not complete)
-    """
-    session = connect_db()
-    network = TwitterUserNetwork(session)
-    network.create()
 
 
 @cli.command()
