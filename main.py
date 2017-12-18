@@ -12,7 +12,8 @@ def cli():
 
 @cli.command()
 @click.option("--depth", "-d", default=1, help="Depth level of crawler")
-def crawl_users(depth):
+@click.option("--con-limit", "-cl", default=15000, help="Connection limit to crawl connections")
+def crawl_users(depth, con_limit):
     """
     Crawls users in screen_names.json using their friends and followers.
     """
@@ -22,7 +23,7 @@ def crawl_users(depth):
     session = connect_db()
     for target in targets:
         crawler = UserCrawler(api, session, target)
-        crawler.crawl(depth=depth)
+        crawler.crawl(depth, con_limit)
 
 
 @cli.command()

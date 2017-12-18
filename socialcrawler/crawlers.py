@@ -48,7 +48,7 @@ class UserCrawler(object):
                 print "user, {} not found.".format(self._user_id)
             return None
 
-    def _crawl_connections(self, connection_type, user_id, depth):
+    def _crawl_connections(self, connection_type, user_id, depth, con_limit):
         connection_ids = self._fetch_connection_ids(user_id, connection_type)
         for connection_id in connection_ids:
             if not row_exist(self._session, TwitterUser, id=connection_id):
@@ -64,7 +64,8 @@ class UserCrawler(object):
                 self._create_connection(connection_id, user_id)
 
             if depth > 1:
-                self._crawl_all(connection_id, depth - 1)
+                crawler = UserCrawler(self._api, self._session, connection_id)
+                crawler.crawl(depth - 1, con_limit)
 
     def _crawl_friends(self, *args):
         self._crawl_connections("friends", *args)
@@ -76,15 +77,16 @@ class UserCrawler(object):
         self._crawl_friends(*args)
         self._crawl_followers(*args)
 
-    def crawl(self, depth=1):
+    def crawl(self, depth, con_limit):
         user = self._api.get_user(self._user_id)
         if not user:
             return
         if not row_exist(self._session, TwitterUser, id=user.id):
             self._create_user(user)
+        if user.followers_count + user.friends_count > con_limit:
+            return
         self._user_id = user.id
-        self._crawl_all(self._user_id, depth)
-        self._session.commit()
+        self._crawl_all(self._user_id, depth, con_limit)
 
 
 class UserTweetCrawler(object):
