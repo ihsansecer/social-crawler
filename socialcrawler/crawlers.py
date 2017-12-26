@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import tweepy
 
 from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry
@@ -37,7 +39,7 @@ class UserCrawler(object):
             return tweepy.Cursor(connection_fetcher, id=user_id).items()
         except tweepy.TweepError as e:
             if e.api_code == 179:
-                print "not authorized to see {} of user, {}.".format(connection_type, self._user_id)
+                print("not authorized to see {} of user, {}.".format(connection_type, self._user_id))
             return []
 
     def _fetch_user(self, user_id):
@@ -45,7 +47,7 @@ class UserCrawler(object):
             return self._api.get_user(user_id)
         except tweepy.TweepError as e:
             if e.api_code == 50:
-                print "user, {} not found.".format(self._user_id)
+                print("user, {} not found.".format(self._user_id))
             return None
 
     def _crawl_connections(self, connection_type, user_id, depth, con_limit):
@@ -107,5 +109,5 @@ class UserTweetCrawler(object):
             self._session.commit()
         except tweepy.TweepError as e:
             if e.api_code == 179:
-                print "not authorized to see tweets of user, {}.".format(self._user_id)
+                print("not authorized to see tweets of user, {}.".format(self._user_id))
             return []

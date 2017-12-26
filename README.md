@@ -6,9 +6,9 @@ This cli tool uses Twitter api to:
 
 ### Setup
 
-Create virtual environment with Python 2.7 interpreter and make sure that your operating system is 64-bit and that you are using 64-bit versions of Python 2.7.x.
+Create a virtual environment
 
-`virtualenv -p /usr/bin/python2.7 venv`
+`virtualenv venv`
 
 Activate virtual environment
 
