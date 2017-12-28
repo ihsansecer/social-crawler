@@ -85,7 +85,7 @@ class UserCrawler(object):
         self._crawl_followers(*args)
 
     def crawl(self, depth, con_limit):
-        user = self._api.get_user(self._user_id)
+        user = self._fetch_user(self._user_id)
         if not user:
             return
         if not row_exist(self._session, TwitterUser, id=user.id):
