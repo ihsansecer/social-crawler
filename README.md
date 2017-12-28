@@ -18,6 +18,30 @@ Install requirements
 
 `pip install -r requirements.txt`
 
+Create a Postgres database
+
+`CREATE DATABASE mydatabase`
+
+Create config.json [file](#config-file) or copy sample_config.json and fill it
+
+`cp sample_config.json config.json`
+
+Run database migrations
+
+`alembic upgrade head`
+
 And ask for help!
 
 `python main.py --help`
+
+### Config file
+
+twitter:
+
+&nbsp;&nbsp;&nbsp;&nbsp; auth: authentication tokens taken from [apps.twitter.com](https://apps.twitter.com/)
+
+&nbsp;&nbsp;&nbsp;&nbsp; targets: target twitter usernames to crawl
+
+db:
+
+&nbsp;&nbsp;&nbsp;&nbsp; url: database address in the format of "driver://user:pass@localhost/dbname"

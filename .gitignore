@@ -27,3 +27,6 @@ venv.bak/
 
 # Outputs
 *.out
+
+# Config
+config.json
