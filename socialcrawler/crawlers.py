@@ -3,7 +3,7 @@ from __future__ import print_function
 import tweepy
 
 from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry, TwitterConnectionChange
-from socialcrawler.utils import row_exist
+from socialcrawler.queries import get_row, row_exist, get_recent_connection_change, get_recent_connection_ids
 
 
 class UserCrawler(object):
@@ -74,19 +74,31 @@ class UserCrawler(object):
                 return
 
     def _crawl_connection(self, connection_type, user_id, depth, con_limit, connection_id):
-        if connection_type == "friends" and \
-                not row_exist(self._session, TwitterConnection, from_user_id=user_id, to_user_id=connection_id):
-            self._create_connection(user_id, connection_id)
-        elif connection_type == "followers" and \
-                not row_exist(self._session, TwitterConnection, from_user_id=connection_id, to_user_id=user_id):
-            self._create_connection(connection_id, user_id)
+        if connection_type == "friends":
+            connection_id in self._friends and self._friends.remove(connection_id)
+            self._create_connection_addition(user_id, connection_id)
+        elif connection_type == "followers":
+            connection_id in self._friends and self._followers.remove(connection_id)
+            self._create_connection_addition(connection_id, user_id)
 
         if depth > 1:
             crawler = UserCrawler(self._api, self._session, connection_id)
             crawler.crawl(depth - 1, con_limit)
 
+    def _create_connection_addition(self, from_user_id, to_user_id):
+        connection = get_row(self._session, TwitterConnection, from_user_id=from_user_id, to_user_id=to_user_id)
+        if connection is None:
+            self._create_connection(from_user_id, to_user_id)
+        elif not get_recent_connection_change(self._session, connection.id).is_added:
+            self._create_connection_change(True, connection.id)
+
+    def _create_connection_deletions(self):
+        remaining_connections = self._friends + self._followers
+        for connection in remaining_connections:
+            self._create_connection_change(False, connection.id)
+
     def _crawl_friends(self, *args):
-        self._crawl_connections("friends", *args)
+        self._crawl_connections("friends", *args)sudo apt-get install pgadmin3
 
     def _crawl_followers(self, *args):
         self._crawl_connections("followers", *args)
@@ -94,6 +106,7 @@ class UserCrawler(object):
     def _crawl_all(self, *args):
         self._crawl_friends(*args)
         self._crawl_followers(*args)
+        self._create_connection_deletions()
 
     def crawl(self, depth, con_limit):
         user = self._fetch_user(self._user_id)
@@ -104,6 +117,7 @@ class UserCrawler(object):
         if user.followers_count + user.friends_count > con_limit:
             return
         self._user_id = user.id
+        self._friends, self._followers = get_recent_connection_ids(self._session, user.id)
         self._crawl_all(self._user_id, depth, con_limit)
 
 
