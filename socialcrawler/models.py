@@ -39,8 +39,7 @@ class TwitterConnectionChange(Base):
     is_added = Column(Boolean, nullable=False)
     connection_id = Column(ForeignKey("twitter_connection.id"), nullable=False)
     connection = relationship("TwitterConnection", foreign_keys=[connection_id])
-    run_id = Column(ForeignKey("crawler_run.id"), nullable=False)
-    run = relationship("CrawlerRun", foreign_keys=[run_id])
+    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 
 
 class TwitterEntry(Base):
@@ -50,10 +49,3 @@ class TwitterEntry(Base):
     user_id = Column(ForeignKey("twitter_user.id"))
     user = relationship("TwitterUser", foreign_keys=[user_id])
     text = Column(String(280))
-
-
-class CrawlerRun(Base):
-    __tablename__ = 'crawler_run'
-
-    id = Column(BigInteger, primary_key=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)

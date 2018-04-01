@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import tweepy
 
-from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry
+from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry, TwitterConnectionChange
 from socialcrawler.utils import row_exist
 
 
@@ -13,7 +13,7 @@ class UserCrawler(object):
         self._user_id = user_id
 
     def _create_user(self, user):
-        self._session.add(TwitterUser(
+        twitter_user = TwitterUser(
             id=user.id,
             name=user.name,
             screen_name=user.screen_name,
@@ -23,14 +23,25 @@ class UserCrawler(object):
             favourites_count=user.favourites_count,
             statuses_count=user.statuses_count,
             lang=user.lang
-        ))
+        )
+        self._session.add(twitter_user)
         self._session.commit()
 
     def _create_connection(self, from_user_id, to_user_id):
-        self._session.add(TwitterConnection(
+        twitter_connection = TwitterConnection(
             from_user_id=from_user_id,
             to_user_id=to_user_id
-        ))
+        )
+        self._session.add(twitter_connection)
+        self._session.commit()
+        self._create_connection_change(True, twitter_connection.id)
+
+    def _create_connection_change(self, is_added, connection_id):
+        twitter_connection_change = TwitterConnectionChange(
+            is_added=is_added,
+            connection_id=connection_id
+        )
+        self._session.add(twitter_connection_change)
         self._session.commit()
 
     def _fetch_connection_ids(self, user_id, connection_type):
@@ -103,11 +114,12 @@ class UserTweetCrawler(object):
         self._session = session
 
     def _create_entry(self, tweet):
-        self._session.merge(TwitterEntry(
+        twitter_entry = TwitterEntry(
             id=tweet.id,
             user_id=self._user_id,
             text=tweet.text
-        ))
+        )
+        self._session.add(twitter_entry)
         self._session.commit()
 
     def crawl(self):
