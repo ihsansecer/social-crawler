@@ -2,7 +2,7 @@ import click
 
 from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
 from socialcrawler.models import TwitterUser
-from socialcrawler.utils import init_twitter_api, get_config, connect_db
+from socialcrawler.utils import init_twitter_api, get_config, connect_db, get_accounts
 
 
 @click.group()
@@ -18,7 +18,7 @@ def crawl_users(depth, con_limit):
     Crawls users in screen_names.json using their friends and followers.
     """
     config = get_config()
-    targets = config.twitter.targets
+    targets = get_accounts()
     api = init_twitter_api()
     session = connect_db()
     for target in targets:

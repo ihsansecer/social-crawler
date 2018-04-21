@@ -1,18 +1,9 @@
 {
-  "twitter" : {
-    "auth": {
-      "consumer_key": "consumer_key",
-      "consumer_secret": "consumer_secret",
-      "access_token": "access_token",
-      "access_token_secret": "access_token_secret"
-    },
-    "targets": [
-      "sehiruniversite","sehirmot", "SehirMYO", "sehir_iletisim", "SamSehir", "SehirSBE", "isifsehir", "SehirKariyer",
-      "SehirClubs", "sehirlibrary", "irosehir", "SehirCHES", "polssehir", "hilsehir", "SehirFelsefe", "SehirCTV",
-      "socsehir", "sehiredebiyat", "Sehir_Law", "sehir_cs", "sehirdramaclub", "SehirCycling", "sehirmusicclub",
-      "sehiricebreaker", "sehir_fm", "sehir_munazara", "sehirsanat", "SehirKonsey", "SehirHUKUK", "sehiryesilay",
-      "sehirpolitika", "SehirMuhKulubu", "gastesehir", "ieeesehir", "qbitclub", "sehircayhane"
-    ]
+  "twitter_auth" : {
+    "consumer_key": "consumer_key",
+    "consumer_secret": "consumer_secret",
+    "access_token": "access_token",
+    "access_token_secret": "access_token_secret"
   },
   "db": {
     "url": "driver://user:pass@localhost/dbname"
