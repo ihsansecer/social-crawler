@@ -39,7 +39,7 @@ def connect_db():
 
 def get_full_names():
     full_names = []
-    with open(ACCOUNTS_FILE, 'r') as csvfile:
+    with open(CONTACTS_FILE, 'r') as csvfile:
         text = csv.reader(csvfile)
         for row in text:
             full_names.append(' '.join(row[1:3]))
