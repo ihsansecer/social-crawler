@@ -4,6 +4,7 @@ import tweepy
 
 from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry, TwitterConnectionChange
 from socialcrawler.queries import get_row, row_exist, get_recent_connection_change, get_recent_connection_ids
+from socialcrawler.utils import match_screen_name
 
 
 class UserCrawler(object):
@@ -12,16 +13,13 @@ class UserCrawler(object):
         self._session = session
         self._user_id = user_id
 
-    def _create_user(self, user):
+    def _create_user(self, user, match):
         twitter_user = TwitterUser(
             id=user.id,
             name=user.name,
             screen_name=user.screen_name,
-            description=user.description,
-            followers_count=user.followers_count,
-            friends_count=user.friends_count,
-            favourites_count=user.favourites_count,
-            statuses_count=user.statuses_count,
+            match_name=match["name"],
+            match_ratio=match["ratio"],
             lang=user.lang
         )
         self._session.add(twitter_user)
@@ -63,9 +61,10 @@ class UserCrawler(object):
                 connection_id = connection_ids.next()
                 if not row_exist(self._session, TwitterUser, id=connection_id):
                     user = self._fetch_user(connection_id)
+                    match = dict(zip(("name", "ratio"), match_screen_name(user.screen_name)))
                     if not user:
                         continue
-                    self._create_user(user)
+                    self._create_user(user, match)
                 self._crawl_connection(connection_type, user_id, depth, con_limit, connection_id)
             except tweepy.TweepError:
                 print("not authorized to see {} of user, {}.".format(connection_type, self._user_id))
@@ -98,7 +97,7 @@ class UserCrawler(object):
             self._create_connection_change(False, connection.id)
 
     def _crawl_friends(self, *args):
-        self._crawl_connections("friends", *args)sudo apt-get install pgadmin3
+        self._crawl_connections("friends", *args)
 
     def _crawl_followers(self, *args):
         self._crawl_connections("followers", *args)

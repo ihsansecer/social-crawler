@@ -14,11 +14,8 @@ class TwitterUser(Base):
     id = Column(BigInteger, primary_key=True)
     name = Column(String(50), nullable=False)
     screen_name = Column(String(50), nullable=False)
-    description = Column(Text)
-    followers_count = Column(Integer, nullable=False)
-    friends_count = Column(Integer, nullable=False)
-    favourites_count = Column(Integer, nullable=False)
-    statuses_count = Column(Integer, nullable=False)
+    match_ratio = Column(Integer)
+    match_name = Column(String(50))
     lang = Column(String(5), nullable=False)
 
 
