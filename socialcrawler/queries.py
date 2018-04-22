@@ -7,6 +7,10 @@ def get_row(session, model, **kwargs):
     return session.query(model).filter_by(**kwargs).first()
 
 
+def get_rows(session, model, **kwargs):
+    return session.query(model).filter_by(**kwargs).all()
+
+
 def row_exist(session, model, **kwargs):
     return get_row(session, model, **kwargs) is not None
 

@@ -117,7 +117,7 @@ class UserCrawler(object):
 
     def crawl(self, depth, match_ratio, connection_limit):
         user = self._fetch_user(self._user_id)
-        print(self._user_id)
+        print("Crawling {}.".format(user.screen_name))
         if not user:
             return
         if not row_exist(self._session, TwitterUser, id=user.id):
