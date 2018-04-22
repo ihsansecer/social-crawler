@@ -13,15 +13,16 @@ class UserCrawler(object):
         self._session = session
         self._user_id = user_id
 
-    def _create_user(self, user, match):
+    def _create_user(self, user, match, match_ratio):
         twitter_user = TwitterUser(
             id=user.id,
             name=user.name,
             screen_name=user.screen_name,
-            match_name=match["name"],
-            match_ratio=match["ratio"],
             lang=user.lang
         )
+        if match["ratio"] >= match_ratio:
+            twitter_user.match_name = match["name"]
+            twitter_user.match_ratio = match["ratio"]
         self._session.add(twitter_user)
         self._session.commit()
 
@@ -54,25 +55,32 @@ class UserCrawler(object):
                 print("user, {} not found.".format(self._user_id))
             return None
 
-    def _crawl_connections(self, connection_type, user_id, depth, con_limit):
+    def _check_fetch_user(self, user_id, match_ratio):
+        user = get_row(self._session, TwitterUser, id=user_id)
+        if user is None:
+            user = self._fetch_user(user_id)
+            match = match_screen_name(user.screen_name)
+            self._create_user(user, match, match_ratio)
+        else:
+            match = match_screen_name(user.screen_name)
+        return user, match
+
+    def _crawl_connections(self, connection_type, user_id, depth, match_ratio, connection_limit):
         connection_ids = self._fetch_connection_ids(user_id, connection_type)
         while True:
             try:
                 connection_id = connection_ids.next()
-                if not row_exist(self._session, TwitterUser, id=connection_id):
-                    user = self._fetch_user(connection_id)
-                    match = dict(zip(("name", "ratio"), match_screen_name(user.screen_name)))
-                    if not user:
-                        continue
-                    self._create_user(user, match)
-                self._crawl_connection(connection_type, user_id, depth, con_limit, connection_id)
+                user, match = self._check_fetch_user(connection_id, match_ratio)
+                if not user:
+                    continue
+                self._crawl_connection(connection_type, user_id, match, depth, match_ratio, connection_limit, connection_id)
             except tweepy.TweepError:
                 print("not authorized to see {} of user, {}.".format(connection_type, self._user_id))
                 return
             except StopIteration:
                 return
 
-    def _crawl_connection(self, connection_type, user_id, depth, con_limit, connection_id):
+    def _crawl_connection(self, connection_type, user_id, match, depth, match_ratio, connection_limit, connection_id):
         if connection_type == "friends":
             connection_id in self._friends and self._friends.remove(connection_id)
             self._create_connection_addition(user_id, connection_id)
@@ -80,9 +88,9 @@ class UserCrawler(object):
             connection_id in self._friends and self._followers.remove(connection_id)
             self._create_connection_addition(connection_id, user_id)
 
-        if depth > 1:
+        if match["ratio"] >= match_ratio and depth > 1:
             crawler = UserCrawler(self._api, self._session, connection_id)
-            crawler.crawl(depth - 1, con_limit)
+            crawler.crawl(depth - 1, match_ratio, connection_limit)
 
     def _create_connection_addition(self, from_user_id, to_user_id):
         connection = get_row(self._session, TwitterConnection, from_user_id=from_user_id, to_user_id=to_user_id)
@@ -107,17 +115,19 @@ class UserCrawler(object):
         self._crawl_followers(*args)
         self._create_connection_deletions()
 
-    def crawl(self, depth, con_limit):
+    def crawl(self, depth, match_ratio, connection_limit):
         user = self._fetch_user(self._user_id)
+        print(self._user_id)
         if not user:
             return
         if not row_exist(self._session, TwitterUser, id=user.id):
-            self._create_user(user)
-        if user.followers_count + user.friends_count > con_limit:
+            match = match_screen_name(user.screen_name)
+            self._create_user(user, match, match_ratio)
+        if user.followers_count + user.friends_count > connection_limit:
             return
         self._user_id = user.id
         self._friends, self._followers = get_recent_connection_ids(self._session, user.id)
-        self._crawl_all(self._user_id, depth, con_limit)
+        self._crawl_all(self._user_id, depth, match_ratio, connection_limit)
 
 
 class UserTweetCrawler(object):

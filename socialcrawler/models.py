@@ -15,7 +15,7 @@ class TwitterUser(Base):
     name = Column(String(50), nullable=False)
     screen_name = Column(String(50), nullable=False)
     match_ratio = Column(Integer)
-    match_name = Column(String(50))
+    match_name = Column(String(150))
     lang = Column(String(5), nullable=False)
 
 
