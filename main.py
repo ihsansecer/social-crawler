@@ -13,33 +13,34 @@ def cli():
 
 @cli.command()
 @click.option("--depth", "-d", default=1, help="Depth level of crawler")
-@click.option('--matchings/--community', default=False)
+@click.option('--matchings/--community', default=False, help="Start crawling from matchings or community accounts")
+@click.option('--matches/--all', default=False, help="Use match ratio as a threshold to continue crawling or not")
 @click.option("--match-ratio", "-mr", default=80, help="Match ratio threshold to continue crawling")
 @click.option("--connection-limit", "-cl", default=15000, help="Connection limit to crawl connections")
-def crawl_users(depth, matchings, match_ratio, connection_limit):
+def crawl_users(depth, matchings, matches, match_ratio, connection_limit):
     """
     Crawls users in screen_names.json using their friends and followers.
     """
     api = init_twitter_api()
     session = connect_db()
     if matchings:
-        crawl_matched_accounts(depth, match_ratio, connection_limit, session, api)
+        crawl_matched_accounts(depth, matches, match_ratio, connection_limit, session, api)
     else:
-        crawl_community_accounts(depth, match_ratio, connection_limit, session, api)
+        crawl_community_accounts(depth, matches, match_ratio, connection_limit, session, api)
 
 
-def crawl_community_accounts(depth, match_ratio, connection_limit, session, api):
+def crawl_community_accounts(depth, matches, match_ratio, connection_limit, session, api):
     targets = get_accounts()
     for target in targets:
         crawler = UserCrawler(api, session, target)
-        crawler.crawl(depth, match_ratio, connection_limit)
+        crawler.crawl(depth, matches, match_ratio, connection_limit)
 
 
-def crawl_matched_accounts(depth, match_ratio, connection_limit, session, api):
+def crawl_matched_accounts(depth, matches, match_ratio, connection_limit, session, api):
     targets = get_rows(session, TwitterUser, match_ratio=match_ratio)
     for target in targets:
         crawler = UserCrawler(api, session, target.id)
-        crawler.crawl(depth, match_ratio, connection_limit)
+        crawler.crawl(depth, matches, match_ratio, connection_limit)
 
 
 @cli.command()
