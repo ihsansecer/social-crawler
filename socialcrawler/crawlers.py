@@ -55,13 +55,12 @@ class UserCrawler(object):
             return None
 
     def _check_fetch_user(self, user_id, match_ratio):
-        user = get_row(self._session, TwitterUser, id=user_id)
-        if user is None:
-            user = self._fetch_user(user_id)
+        row = get_row(self._session, TwitterUser, id=user_id)
+        user = self._fetch_user(user_id) if not row else row
+        if user:
             match = match_screen_name(user.screen_name)
-            self._create_user(user, match, match_ratio)
-        else:
-            match = match_screen_name(user.screen_name)
+            if not row:
+                self._create_user(user, match, match_ratio)
         return user, match
 
     def _crawl_connections(self, connection_type, user_id, depth, matches, match_ratio, connection_limit):
