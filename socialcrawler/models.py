@@ -16,6 +16,8 @@ class TwitterUser(Base):
     screen_name = Column(String(50), nullable=False)
     match_ratio = Column(Integer)
     match_name = Column(String(150))
+    followers_count = Column(Integer)
+    friends_count = Column(Integer)
     lang = Column(String(5), nullable=False)
 
 

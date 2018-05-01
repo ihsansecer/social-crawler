@@ -18,6 +18,8 @@ class UserCrawler(object):
             id=user.id,
             name=user.name,
             screen_name=user.screen_name,
+            followers_count=user.followers_count,
+            friends_count=user.friends_count,
             match_name = match["name"],
             match_ratio = match["ratio"],
             lang=user.lang
