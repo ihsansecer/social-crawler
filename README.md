@@ -36,11 +36,9 @@ And ask for help!
 
 ### Config file
 
-twitter:
+twitter_auth:
 
-&nbsp;&nbsp;&nbsp;&nbsp; auth: authentication tokens taken from [apps.twitter.com](https://apps.twitter.com/)
-
-&nbsp;&nbsp;&nbsp;&nbsp; targets: target twitter usernames to crawl
+&nbsp;&nbsp;&nbsp;&nbsp; authentication tokens taken from [apps.twitter.com](https://apps.twitter.com/)
 
 db:
 
