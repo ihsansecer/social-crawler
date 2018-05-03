@@ -63,7 +63,9 @@ class UserCrawler(object):
             match = match_screen_name(user.screen_name)
             if not row:
                 self._create_user(user, match, match_ratio)
-        return user, match
+            return user, match
+        else:
+            return None, None
 
     def _crawl_connections(self, connection_type, user_id, depth, matches, match_ratio, connection_limit):
         connection_ids = self._fetch_connection_ids(user_id, connection_type)
