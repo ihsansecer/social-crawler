@@ -1,8 +1,10 @@
+import datetime
+
 import click
 
-from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
+from socialcrawler.crawlers import UserCrawler, UserTweetCrawler, TwitterConnection
 from socialcrawler.models import TwitterUser
-from socialcrawler.queries import get_rows
+from socialcrawler.queries import get_rows, get_recent_connection_change
 from socialcrawler.utils import init_twitter_api, connect_db, get_accounts
 
 
@@ -27,6 +29,23 @@ def crawl_users(depth, matchings, matches, match_ratio, connection_limit):
     for target in targets:
         crawler = UserCrawler(api, session, target.id) if matchings else UserCrawler(api, session, target)
         crawler.crawl(depth, matches, match_ratio, connection_limit)
+
+
+@cli.command()
+@click.option("--date", "-d", default=None, help="Date to add as key")
+def denormalize_connection_changes(date):
+    if not date:
+        date = datetime.datetime.now().strftime("%y.%m.%d")
+    session = connect_db()
+    connections = get_rows(session, TwitterConnection)
+    for connection in connections:
+        change = get_recent_connection_change(session, connection.id)
+        formation = dict(connection.formation) if connection.formation else {}
+        formation[date] = change.is_added
+        connection.formation = formation
+        session.add(connection)
+    session.commit()
+
 
 
 @cli.command()

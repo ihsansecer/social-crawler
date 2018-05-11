@@ -1,6 +1,7 @@
 import datetime
 
 from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger, Text, DateTime, Boolean
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -29,6 +30,7 @@ class TwitterConnection(Base):
     from_user = relationship("TwitterUser", foreign_keys=[from_user_id])
     to_user_id = Column(ForeignKey("twitter_user.id"))
     to_user = relationship("TwitterUser", foreign_keys=[to_user_id])
+    formation = Column(JSONB)
 
 
 class TwitterConnectionChange(Base):
