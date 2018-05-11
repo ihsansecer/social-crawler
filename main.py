@@ -23,23 +23,9 @@ def crawl_users(depth, matchings, matches, match_ratio, connection_limit):
     """
     api = init_twitter_api()
     session = connect_db()
-    if matchings:
-        crawl_matched_accounts(depth, matches, match_ratio, connection_limit, session, api)
-    else:
-        crawl_community_accounts(depth, matches, match_ratio, connection_limit, session, api)
-
-
-def crawl_community_accounts(depth, matches, match_ratio, connection_limit, session, api):
-    targets = get_accounts()
+    targets = get_rows(session, TwitterUser, match_ratio=match_ratio) if matchings else get_accounts()
     for target in targets:
-        crawler = UserCrawler(api, session, target)
-        crawler.crawl(depth, matches, match_ratio, connection_limit)
-
-
-def crawl_matched_accounts(depth, matches, match_ratio, connection_limit, session, api):
-    targets = get_rows(session, TwitterUser, match_ratio=match_ratio)
-    for target in targets:
-        crawler = UserCrawler(api, session, target.id)
+        crawler = UserCrawler(api, session, target.id) if matchings else UserCrawler(api, session, target)
         crawler.crawl(depth, matches, match_ratio, connection_limit)
 
 
