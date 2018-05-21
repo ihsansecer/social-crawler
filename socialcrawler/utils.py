@@ -47,4 +47,4 @@ def get_full_names():
 
 
 full_names = get_full_names()
-match_screen_name = lambda screen_name: dict(zip(("name", "ratio"), process.extractOne(screen_name, full_names)))
+match_name = lambda name: dict(zip(("name", "ratio"), process.extractOne(name, full_names)))

@@ -4,7 +4,7 @@ import tweepy
 
 from socialcrawler.models import TwitterUser, TwitterConnection, TwitterEntry, TwitterConnectionChange
 from socialcrawler.queries import get_row, row_exist, get_recent_connection_change, get_recent_connection_ids
-from socialcrawler.utils import match_screen_name
+from socialcrawler.utils import match_name
 
 
 class UserCrawler(object):
@@ -60,7 +60,7 @@ class UserCrawler(object):
         row = get_row(self._session, TwitterUser, id=user_id)
         user = self._fetch_user(user_id) if not row else row
         if user:
-            match = match_screen_name(user.screen_name)
+            match = match_name(user.name)
             if not row:
                 self._create_user(user, match, match_ratio)
             return user, match
@@ -123,7 +123,7 @@ class UserCrawler(object):
         if not user:
             return
         if not row_exist(self._session, TwitterUser, id=user.id):
-            match = match_screen_name(user.screen_name)
+            match = match_name(user.screen_name)
             self._create_user(user, match, match_ratio)
         if user.followers_count + user.friends_count > connection_limit:
             return
