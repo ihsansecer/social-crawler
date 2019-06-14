@@ -1,6 +1,15 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger, Text, DateTime, Boolean
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    BigInteger,
+    Text,
+    DateTime,
+    Boolean,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -23,7 +32,7 @@ class TwitterUser(Base):
 
 
 class TwitterConnection(Base):
-    __tablename__ = 'twitter_connection'
+    __tablename__ = "twitter_connection"
 
     id = Column(Integer, primary_key=True)
     from_user_id = Column(ForeignKey("twitter_user.id"))
@@ -34,17 +43,21 @@ class TwitterConnection(Base):
 
 
 class TwitterConnectionChange(Base):
-    __tablename__ = 'twitter_connection_change'
+    __tablename__ = "twitter_connection_change"
 
     id = Column(Integer, primary_key=True)
     is_added = Column(Boolean, nullable=False)
     connection_id = Column(ForeignKey("twitter_connection.id"), nullable=False)
-    connection = relationship("TwitterConnection", foreign_keys=[connection_id])
-    created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    connection = relationship(
+        "TwitterConnection", foreign_keys=[connection_id]
+    )
+    created_at = Column(
+        DateTime, default=datetime.datetime.utcnow, nullable=False
+    )
 
 
 class TwitterEntry(Base):
-    __tablename__ = 'twitter_entry'
+    __tablename__ = "twitter_entry"
 
     id = Column(Integer, primary_key=True)
     user_id = Column(ForeignKey("twitter_user.id"))

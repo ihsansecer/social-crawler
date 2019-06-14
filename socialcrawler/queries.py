@@ -16,15 +16,19 @@ def row_exist(session, model, **kwargs):
 
 
 def get_connections(session, user_id):
-    return session.query(TwitterConnection).\
-        filter(TwitterConnection.from_user_id==user_id,
-        TwitterConnection.to_user_id==user_id)
+    return session.query(TwitterConnection).filter(
+        TwitterConnection.from_user_id == user_id,
+        TwitterConnection.to_user_id == user_id,
+    )
 
 
 def get_recent_connection_change(session, connection_id):
-    return session.query(TwitterConnectionChange).\
-        filter(TwitterConnectionChange.connection_id==connection_id).\
-        order_by(desc("created_at")).first()
+    return (
+        session.query(TwitterConnectionChange)
+        .filter(TwitterConnectionChange.connection_id == connection_id)
+        .order_by(desc("created_at"))
+        .first()
+    )
 
 
 def get_recent_connection_ids(session, user_id):

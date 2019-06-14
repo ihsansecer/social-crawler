@@ -2,9 +2,9 @@ import datetime
 
 import click
 
-from socialcrawler.crawlers import UserCrawler, UserTweetCrawler, TwitterConnection
+from socialcrawler.crawlers import UserCrawler, UserTweetCrawler
 from socialcrawler.models import TwitterUser
-from socialcrawler.queries import get_rows, get_recent_connection_change
+from socialcrawler.queries import get_rows
 from socialcrawler.utils import init_twitter_api, connect_db, get_accounts
 
 
@@ -15,37 +15,46 @@ def cli():
 
 @cli.command()
 @click.option("--depth", "-d", default=1, help="Depth level of crawler")
-@click.option('--matchings/--community', default=False, help="Start crawling from matchings or community accounts")
-@click.option('--matches/--all', default=False, help="Use match ratio as a threshold to continue crawling or not")
-@click.option("--match-ratio", "-mr", default=80, help="Match ratio threshold to continue crawling")
-@click.option("--connection-limit", "-cl", default=15000, help="Connection limit to crawl connections")
+@click.option(
+    "--matchings/--community",
+    default=False,
+    help="Start crawling from matchings or community accounts",
+)
+@click.option(
+    "--matches/--all",
+    default=False,
+    help="Use match ratio as a threshold to continue crawling or not",
+)
+@click.option(
+    "--match-ratio",
+    "-mr",
+    default=80,
+    help="Match ratio threshold to continue crawling",
+)
+@click.option(
+    "--connection-limit",
+    "-cl",
+    default=15000,
+    help="Connection limit to crawl connections",
+)
 def crawl_users(depth, matchings, matches, match_ratio, connection_limit):
     """
     Crawls users in screen_names.json using their friends and followers.
     """
     api = init_twitter_api()
     session = connect_db()
-    targets = get_rows(session, TwitterUser, match_ratio=match_ratio) if matchings else get_accounts()
+    targets = (
+        get_rows(session, TwitterUser, match_ratio=match_ratio)
+        if matchings
+        else get_accounts()
+    )
     for target in targets:
-        crawler = UserCrawler(api, session, target.id) if matchings else UserCrawler(api, session, target)
+        crawler = (
+            UserCrawler(api, session, target.id)
+            if matchings
+            else UserCrawler(api, session, target)
+        )
         crawler.crawl(depth, matches, match_ratio, connection_limit)
-
-
-@cli.command()
-@click.option("--date", "-d", default=None, help="Date to add as key")
-def denormalize_connection_changes(date):
-    if not date:
-        date = datetime.datetime.now().strftime("%y.%m.%d")
-    session = connect_db()
-    connections = get_rows(session, TwitterConnection)
-    for connection in connections:
-        change = get_recent_connection_change(session, connection.id)
-        formation = dict(connection.formation) if connection.formation else {}
-        formation[date] = change.is_added
-        connection.formation = formation
-        session.add(connection)
-    session.commit()
-
 
 
 @cli.command()
@@ -61,5 +70,5 @@ def crawl_tweets():
         crawler.crawl()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
