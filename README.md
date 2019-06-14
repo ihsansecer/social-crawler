@@ -1,8 +1,6 @@
 # Social Crawler
 
-This cli tool uses Twitter api to:
-- Crawls friends and followers of users inside screen_names.json
-- Crawls tweets of users
+This cli tool uses Twitter api to crawl friends and followers of institutional accouns of Şehir to build a network of the university. It also matches users with their e-mail accounts through their names. Tweets of the users are collected afterwards.
 
 ### Setup
 
