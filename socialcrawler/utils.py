@@ -4,7 +4,7 @@ import csv
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fuzzywuzzy import process
+from rapidfuzz import process
 import tweepy
 
 
